@@ -1,5 +1,9 @@
+// UploadForm.vue
+// 组件功能：上传页的核心上传表单和文件列表展示、处理
 <template>
+    <!-- 上传表单主容器 -->
     <div class="upload-form">
+        <!-- 拖拽/点击/粘贴上传区域，默认上传方式 -->
         <el-upload
             v-if="uploadMethod === 'default'"
             class="upload-card"
@@ -19,6 +23,7 @@
             </el-icon>
             <div class="el-upload__text" :class="{'upload-list-busy': fileList.length}"><em>拖拽</em> <em>点击</em> 或 <em>Ctrl + V</em> 粘贴上传</div>
         </el-upload>
+        <!-- 粘贴外链上传方式 -->
         <div v-else-if="uploadMethod === 'paste'" class="upload-card">
             <el-card 
                 class="paste-card"
@@ -51,9 +56,11 @@
                 </div>
             </el-card>
         </div>
+        <!-- 上传文件列表展示卡片 -->
         <el-card class="upload-list-card" :class="{'upload-list-busy': fileList.length}">
             <div class="upload-list-container" :class="{'upload-list-busy': fileList.length}">
                 <el-scrollbar @scroll="handleScroll" ref="scrollContainer">
+                    <!-- 文件上传状态统计与批量操作 -->
                     <div class="upload-list-dashboard" :class="{ 'list-scrolled': listScrolled }">
                         <el-text class="upload-list-dashboard-title">
                             <el-icon><List /></el-icon>{{ uploadingCount + waitingCount }}
@@ -88,6 +95,7 @@
                             </el-button-group>
                         </div>
                     </div>
+                    <!-- 单个文件上传项 -->
                     <div class="upload-list-item" v-for="file in fileList.slice().reverse()" :key="file.name" :span="8">
                         <a :href="file.url" target="_blank" class="upload-list-item-preview">
                             <!-- 判断文件类型是否为视频 -->
@@ -161,6 +169,7 @@ import * as imageConversion from 'image-conversion'
 export default {
 name: 'UploadForm',
 props: {
+    // 上传格式相关配置
     selectedUrlForm: {
         type: String,
         default: 'url',
@@ -229,19 +238,20 @@ props: {
 },
 data() {
     return {
-        fileList: [],
-        uploading: false,
-        maxUploading: 6,
-        waitingList: [],
-        exceptionList: [],
-        listScrolled: false,
-        fileListLength: 0,
-        uploadCount: 0,
-        pastedUrls: '',
-        pasteUploadMethod: 'save',
+        fileList: [], // 文件列表
+        uploading: false, // 是否正在上传
+        maxUploading: 6, // 最大并发上传数
+        waitingList: [], // 等待上传队列
+        exceptionList: [], // 上传失败队列
+        listScrolled: false, // 列表是否滚动
+        fileListLength: 0, // 文件列表长度
+        uploadCount: 0, // 当前上传计数
+        pastedUrls: '', // 粘贴上传的外链内容
+        pasteUploadMethod: 'save', // 粘贴上传方式
     }
 },
 watch: {
+    // 监听 fileList 变化，自动滚动到顶部
     fileList: {
         handler() {
             if (this.fileList.length > this.fileListLength) {
@@ -256,6 +266,7 @@ watch: {
         },
         deep: true
     },
+    // 监听自定义外链前缀变化，自动更新所有文件的外链
     useCustomUrl: {
         handler() {
             if (this.useCustomUrl === 'true') {
@@ -300,29 +311,35 @@ watch: {
     }
 },
 computed: {
+    // 上传成功文件数
     uploadSuccessCount() {
         return this.fileList.filter(item => item.status === 'done' || item.status === 'success').length
     },
+    // 上传失败文件数
     uploadErrorCount() {
         return this.fileList.filter(item => item.status === 'exception').length
     },
+    // 正在上传文件数
     uploadingCount() {
         return this.fileList.filter(item => item.status === 'uploading').length
     },
+    // 等待上传文件数
     waitingCount() {
         return this.waitingList.length
     },
+    // 链接输入框尺寸，移动端为 small
     urlSize() {
-        // 移动端为small
         return window.innerWidth < 768 ? 'small' : 'default'
     },
+    // 是否禁用 tooltip
     disableTooltip() {
         return window.innerWidth < 768
     },
+    // 链接前缀，优先级：用户自定义 > urlPrefix > 默认
     rootUrl() {
-        // 链接前缀，优先级：用户自定义 > urlPrefix > 默认
         return this.useCustomUrl === 'true' ? this.customUrlPrefix : this.urlPrefix || `${window.location.protocol}//${window.location.host}/file/`
     },
+    // 粘贴上传方式按钮尺寸
     pasteCardMethodButtonSize() {
         if (this.fileList.length) {
             return 'small'
@@ -332,12 +349,15 @@ computed: {
     }
 },
 mounted() {
+    // 监听粘贴事件
     document.addEventListener('paste', this.handlePaste)
 },
 beforeUnmount() {
+    // 移除粘贴事件监听
     document.removeEventListener('paste', this.handlePaste)
 },
 methods: {
+    // 上传文件主逻辑，支持并发、断点、重试等
     uploadFile(file) {
         // 如果fileList中不存在该文件，说明已被删除，直接返回
         if (!this.fileList.find(item => item.uid === file.file.uid)) {
@@ -392,6 +412,7 @@ methods: {
             }
         })
     },
+    // 移除文件
     handleRemove(file) {
         this.fileList = this.fileList.filter(item => item.uid !== file.uid)
         this.$message({
@@ -399,6 +420,7 @@ methods: {
             message: file.name + '已删除'
         })
     },
+    // 上传成功回调，处理各种格式链接生成
     handleSuccess(response, file) {
         try {     
             // 对上传渠道为外链的，不修改链接
@@ -435,6 +457,7 @@ methods: {
             }
         }
     },
+    // 上传失败回调
     handleError(err, file) {
         this.$message.error(file.name + '上传失败')
         this.fileList.find(item => item.uid === file.uid).status = 'exception'
@@ -446,6 +469,7 @@ methods: {
             this.uploading = false
         }
     },
+    // 单个文件复制链接
     handleCopy(file) {
         const status = this.fileList.find(item => item.uid === file.uid).status
         if (status !== 'done' && status !== 'success') {
@@ -471,6 +495,7 @@ methods: {
             message: '复制成功'
         })
     },
+    // 上传前处理（压缩、校验等）
     beforeUpload(file) {
         return new Promise((resolve, reject) => {
             // 客户端压缩条件：1.文件类型为图片 2.开启客户端压缩，且文件大小大于压缩阈值；或为Telegram渠道且文件大小大于20MB
@@ -547,9 +572,11 @@ methods: {
             }
         })
     },
+    // 上传进度处理
     handleProgress(event) {
         this.fileList.find(item => item.uid === event.file.uid).progreess = event.percent
     },
+    // 批量复制所有链接
     copyAll() {
         if (this.selectedUrlForm === 'url') {
             const urls = this.fileList.map(item => {
@@ -592,6 +619,7 @@ methods: {
             message: '整体复制成功'
         })
     },
+    // 清空所有文件
     clearFileList() {
         if (this.fileList.length > 0) {
             this.fileList = []
@@ -606,6 +634,7 @@ methods: {
             })
         }
     },
+    // 清空已上传文件
     clearSuccessList() {
         if (this.uploadSuccessCount > 0) {
             this.fileList = this.fileList.filter(item => item.status !== 'done' && item.status !== 'success')
@@ -620,6 +649,7 @@ methods: {
             })
         }
     },
+    // 处理粘贴上传
     handlePaste(event) {
         // 当粘贴位置是文本框时，不执行该操作
         if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
@@ -630,6 +660,7 @@ methods: {
             this.uploadFromUrl(items)
         }
     },
+    // 粘贴外链上传
     handleUploadPasteUrls() {
         // 用于上传在上传文本框中粘贴的外链
         const urls = this.pastedUrls.split('\n');
@@ -683,6 +714,7 @@ methods: {
             }
         }
     },
+    // 通过 URL 上传
     uploadFromUrl(items) {
         for (let i = 0; i < items.length; i++) {
             if (items[i].kind === 'file') {
@@ -797,6 +829,7 @@ methods: {
             }
         }
     },
+    // 选中文本自动复制
     selectAllText(event) {
         // 复制到剪贴板
         navigator.clipboard.writeText(event.target.value)
@@ -828,9 +861,11 @@ methods: {
         const extension = fileName.split('.').pop().toLowerCase();
         return videoExtensions.includes(extension);
     },
+    // 滚动处理
     handleScroll(event) {
         this.listScrolled = event.scrollTop > 0 && this.fileList.length > 0
     },
+    // 失败重试
     retryError() {
         if (this.exceptionList.length > 0) {
             this.exceptionList.forEach(file => {

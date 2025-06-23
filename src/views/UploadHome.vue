@@ -45,10 +45,10 @@
             </el-tooltip>
         </div>
         <div class="header">
-            <a href="https://github.com/MarSeventh/CloudFlare-ImgBed">
+            <!--<a href="https://github.com/MarSeventh/CloudFlare-ImgBed">-->
                 <img class="logo" alt="Sanyue logo" :src="logoUrl"/>
-            </a> 
-            <h1 class="title"><a class="main-title" href="https://github.com/MarSeventh/CloudFlare-ImgBed" target="_blank">{{ ownerName }}</a> ImgHub</h1>
+            <!--</a>-->
+            <h1 class="title"><!-- <a class="main-title" href="https://github.com/MarSeventh/CloudFlare-ImgBed" target="_blank">{{ ownerName }}</a> --><span class="main-title">{{ ownerName }}</span><!-- ImgHub --></h1>
         </div>
         <UploadForm 
             :selectedUrlForm="selectedUrlForm" 
@@ -174,7 +174,7 @@
             </el-form>
         </el-dialog>
     </div>
-    <Footer class="footer"/>
+    <!--<Footer class="footer"/>-->
     <el-dialog title="公告" v-model="showAnnouncementDialog" :width="dialogWidth" :show-close="false" :close-on-click-modal="false" :close-on-press-escape="false" center>
         <div v-html="announcementContent"></div>
         <template #footer>

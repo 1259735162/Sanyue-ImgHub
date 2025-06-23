@@ -60,11 +60,6 @@ const applyDarkModeClass = (isDarkMode) => {
     }
 };
 
-// 预设网站标题的函数
-const presetSiteTitle = (userConfig) => {
-    document.title = userConfig?.siteTitle || 'Sanyue ImgHub';
-};
-
 // 预设网站图标的函数
 const presetSiteIcon = (isDarkMode, userConfig) => { 
     const link = document.createElement('link');
@@ -77,6 +72,11 @@ const presetSiteIcon = (isDarkMode, userConfig) => {
     }
     
     document.head.appendChild(link);
+};
+
+// 预设网站标题的函数
+const presetSiteTitle = (userConfig) => {
+    document.title = userConfig?.siteTitle || 'Sanyue ImgHub';
 };
 
 store.dispatch('fetchUserConfig').then(() => {

@@ -1,8 +1,12 @@
+// SysCogSecurity.vue
+// 组件功能：系统设置页面的"安全设置"部分，包括认证、访问、上传等安全相关配置
 <template>
+    <!-- 安全设置主容器，loading 时显示加载动画 -->
     <div class="security-settings" v-loading="loading">
         <!-- 一级设置：认证管理 -->
         <div class="first-settings">
             <h3 class="first-title">认证管理</h3>
+            <!-- 用户端认证设置 -->
             <h4 class="second-title">用户端认证</h4>
             <el-form 
                 :model="authSettings.user" 
@@ -18,6 +22,7 @@
                     <el-input v-model="authSettings.user.confirmNewUserPassword" type="password" show-password autocomplete="new-password"/>
                 </el-form-item>
             </el-form>
+            <!-- 管理端认证设置 -->
             <h4 class="second-title">管理端认证</h4>
             <el-form 
                 :model="authSettings.admin"
@@ -41,6 +46,7 @@
         <!-- 一级设置：上传管理 -->
         <div class="first-settings">
             <h3 class="first-title">上传管理</h3>
+            <!-- 图像审查设置 -->
             <h4 class="second-title">图像审查
                 <el-tooltip content="目前仅支持 moderatecontent.com 渠道" placement="top">
                     <font-awesome-icon icon="question-circle" style="margin-left: 5px; cursor: pointer;"/>
@@ -59,6 +65,7 @@
         <!-- 一级设置：访问管理 -->
         <div class="first-settings">
             <h3 class="first-title">访问管理</h3>
+            <!-- 域名过滤设置 -->
             <h4 class="second-title">域名过滤</h4>
             <el-form :model="accessSettings" label-width="120px">
                 <el-form-item>
@@ -96,13 +103,13 @@ export default {
 data() {
     return {
         authSettings: {
-            user: {},
-            admin: {}
+            user: {}, // 用户端认证设置
+            admin: {} // 管理端认证设置
         },
         uploadSettings: {
-            moderate: {}
+            moderate: {} // 图像审查设置
         },
-        accessSettings: {},
+        accessSettings: {}, // 访问管理设置
         // 加载状态
         loading: false,
 
@@ -113,6 +120,7 @@ data() {
         showUserPassConfirm: false, // 显示用户密码确认框
         showAdminPassConfirm: false, // 显示管理密码确认框
 
+        // 用户端密码校验规则
         userPassRules: {
             confirmNewUserPassword: [
                 { message: '请再次输入上传密码', trigger: 'blur' },
@@ -126,6 +134,7 @@ data() {
             ]
         },
 
+        // 管理端密码校验规则
         adminPassRules: {
             confirmNewAdminPassword: [
                 { message: '请再次输入管理密码', trigger: 'blur' },
@@ -143,6 +152,7 @@ data() {
 computed: {
 },
 methods: {
+    // 处理用户端密码输入，判断是否需要显示确认框
     handleUserPassInput() {
         if (this.authSettings.user.authCode !== this.oriUserPassword) {
             this.showUserPassConfirm = true;
@@ -150,6 +160,7 @@ methods: {
             this.showUserPassConfirm = false;
         }
     },
+    // 处理管理端密码输入，判断是否需要显示确认框
     handleAdminPassInput() {
         if (this.authSettings.admin.adminPassword !== this.oriAdminPassword) {
             this.showAdminPassConfirm = true;
@@ -157,6 +168,7 @@ methods: {
             this.showAdminPassConfirm = false;
         }
     },
+    // 保存所有安全设置到后端
     saveSettings() {
         // 所有表单的Promise数组
         let validationPromises = [];
@@ -206,7 +218,7 @@ methods: {
 },
 mounted() {
     this.loading = true;
-    // 获取上传设置
+    // 获取当前安全设置
     fetchWithAuth('/api/manage/sysConfig/security')
     .then((response) => response.json())
     .then((data) => {
@@ -228,6 +240,7 @@ mounted() {
 </script>
 
 <style scoped>
+/* 安全设置主容器样式 */
 .security-settings {
     padding: 20px;
     min-height: 500px;

@@ -1,12 +1,17 @@
+// SysCogUpload.vue
+// 组件功能：系统设置页面的"上传设置"部分，包含上传相关的所有配置项
 <template>
+    <!-- 上传设置主容器，loading 时显示加载动画 -->
     <div class="upload-settings" v-loading="loading">   
         <!-- 一级设置：上传渠道 -->
         <div class="upload-channel">
         <h3 class="first-title">上传渠道
-            <el-tooltip content="设置每类上传渠道的详细配置 <br> 点击“保存设置”会同时保存对每类配置的修改" placement="right" raw-content>
+            <!-- 上传渠道说明提示 -->
+            <el-tooltip :content="tooltipContent" placement="right" raw-content>
                 <font-awesome-icon icon="question-circle" style="margin-left: 5px; cursor: pointer;"/>
             </el-tooltip>
         </h3>
+        <!-- 上传渠道单选按钮组 -->
         <el-radio-group v-model="activeChannel">
             <el-radio
             v-for="channel in channels"
@@ -21,10 +26,12 @@
         <!-- 二级设置：具体渠道配置 -->
         <div class="channel-settings">
         <h4 class="second-title">{{ activeChannelLabel }} 设置
+            <!-- Telegram 渠道说明 -->
             <el-tooltip v-if="activeChannel === 'telegram'" content="为保证兼容性，v2版本前设置的 Telegram 相关环境变量请保留" placement="right">
                 <font-awesome-icon icon="question-circle" style="margin-left: 5px; cursor: pointer;"/>
             </el-tooltip>
         </h4>
+        <!-- Telegram 渠道配置表单 -->
         <div v-if="activeChannel === 'telegram'">
             <!-- 负载均衡配置 -->
             <el-form 
@@ -58,7 +65,7 @@
                 <el-form-item label="Chat ID" prop="chatId">
                     <el-input v-model="channel.chatId" :disabled="channel.fixed" type="password" show-password autocomplete="new-password"/>
                 </el-form-item>
-                <!-- 删除 -->
+                <!-- 删除渠道按钮 -->
                 <el-form-item>
                     <el-button type="danger" @click="deleteChannel(index)" size="small" :disabled="channel.fixed">
                         <font-awesome-icon icon="trash-alt" />
@@ -67,6 +74,7 @@
             </el-form>
         </div>
 
+        <!-- CloudFlareR2 渠道配置表单 -->
         <div v-if="activeChannel === 'cfr2'">
             <el-form 
                 v-for="(channel, index) in cfr2Settings.channels"
@@ -92,6 +100,7 @@
             </el-form>
         </div>
 
+        <!-- S3 渠道配置表单 -->
         <div v-if="activeChannel === 's3'">
             <!-- 负载均衡配置 -->
             <el-form 
@@ -142,7 +151,7 @@
                 <el-form-item label="机密访问密钥" prop="secretAccessKey">
                     <el-input v-model="channel.secretAccessKey" :disabled="channel.fixed" type="password" show-password autocomplete="new-password"/>
                 </el-form-item>
-                <!-- 删除 -->
+                <!-- 删除渠道按钮 -->
                 <el-form-item>
                     <el-button type="danger" @click="deleteChannel(index)" size="small" :disabled="channel.fixed">
                         <font-awesome-icon icon="trash-alt" />
@@ -179,10 +188,11 @@ data() {
 
     // 二级设置：Telegram 配置
     telegramSettings: {
-        loadBalance: {},
-        channels: []
+        loadBalance: {}, // 负载均衡设置
+        channels: [] // Telegram 渠道列表
     },
 
+    // Telegram 校验规则
     tgRules: {
         name: [
             { required: true, message: '请输入渠道名', trigger: 'blur' },
@@ -213,15 +223,16 @@ data() {
 
     // 二级设置：CFR2 配置
     cfr2Settings: {
-        channels: []
+        channels: [] // CloudFlareR2 渠道列表
     },
 
     // 二级设置：S3 配置
     s3Settings: {
-        loadBalance: {},
-        channels: []
+        loadBalance: {}, // 负载均衡设置
+        channels: [] // S3 渠道列表
     },
 
+    // S3 校验规则
     s3Rules: {
         name: [
             { required: true, message: '请输入渠道名', trigger: 'blur' },
@@ -260,7 +271,9 @@ data() {
     },
 
     // 加载状态
-    loading: false
+    loading: false,
+
+    tooltipContent: '设置每类上传渠道的详细配置 <br> 点击"保存设置"会同时保存对每类配置的修改',
 
     };
 },
@@ -274,6 +287,7 @@ computed: {
     }
 },
 methods: {
+    // 添加新渠道
     addChannel() {
         switch (this.activeChannel) {
             case 'telegram':
@@ -317,6 +331,7 @@ methods: {
                 break;
         }
     },
+    // 删除渠道
     deleteChannel(index) {
         switch (this.activeChannel) {
             case 'telegram':
@@ -348,6 +363,7 @@ methods: {
                 break;
         }
     },
+    // 保存所有上传设置到后端
     saveSettings() {
         // 所有表单的 Promise 数组
         let validationPromises = [];
@@ -400,7 +416,7 @@ methods: {
 },
 mounted() {
     this.loading = true;
-    // 获取上传设置
+    // 获取当前上传设置
     fetchWithAuth('/api/manage/sysConfig/upload')
     .then((response) => response.json())
     .then((data) => {
@@ -416,6 +432,7 @@ mounted() {
 </script>
 
 <style scoped>
+/* 上传设置主容器样式 */
 .upload-settings {
     padding: 20px;
     min-height: 500px;

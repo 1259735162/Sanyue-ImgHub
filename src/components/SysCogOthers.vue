@@ -1,8 +1,12 @@
+// SysCogOthers.vue
+// 组件功能：系统设置页面的“其他设置”部分
 <template>
+    <!-- 其他设置主容器，loading 时显示加载动画 -->
     <div class="others-settings" v-loading="loading">
         <!-- 一级设置：其他设置 -->
         <div class="first-settings">
             <h3 class="first-title">其他设置</h3>
+            <!-- 远端遥测设置 -->
             <h4 class="second-title">远端遥测
                 <el-tooltip content="便于问题查找和定位，建议开启" placement="right">
                     <font-awesome-icon icon="question-circle" style="margin-left: 5px; cursor: pointer;"/>
@@ -13,6 +17,7 @@
                     <el-switch v-model="settings.telemetry.enabled" :disabled="settings.telemetry.fixed"></el-switch>
                 </el-form-item>
             </el-form>
+            <!-- 随机图像API设置 -->
             <h4 class="second-title">随机图像API
                 <el-tooltip content="API具体用法请查阅文档" placement="right">
                     <font-awesome-icon icon="question-circle" style="margin-left: 5px; cursor: pointer;"/>
@@ -32,6 +37,7 @@
                     <el-input v-model="settings.randomImageAPI.allowedDir" :disabled="settings.randomImageAPI.fixed"></el-input>
                 </el-form-item>
             </el-form>
+            <!-- CloudFlare API Token 设置 -->
             <h4 class="second-title">CloudFlare API Token
                 <el-tooltip content="设置后可以使后端拉黑、删除等操作不受CDN缓存限制 <br/> 建议设置,设置方式请查阅文档" placement="right" raw-content>
                     <font-awesome-icon icon="question-circle" style="margin-left: 5px; cursor: pointer;"/>
@@ -65,9 +71,9 @@ export default {
 data() {
     return {
         settings: {
-            telemetry: {},
-            randomImageAPI: {},
-            cloudflareApiToken: {},
+            telemetry: {}, // 远端遥测设置
+            randomImageAPI: {}, // 随机图像API设置
+            cloudflareApiToken: {}, // CloudFlare API Token 设置
         },
         // 加载状态
         loading: false
@@ -76,6 +82,7 @@ data() {
 computed: {
 },
 methods: {
+    // 保存设置到后端
     saveSettings() {
         fetchWithAuth('/api/manage/sysConfig/others', {
             method: 'POST',
@@ -89,7 +96,7 @@ methods: {
 },
 mounted() {
     this.loading = true;
-    // 获取上传设置
+    // 获取当前设置
     fetchWithAuth('/api/manage/sysConfig/others')
     .then((response) => response.json())
     .then((data) => {
@@ -103,6 +110,7 @@ mounted() {
 </script>
 
 <style scoped>
+/* 其他设置页面整体样式 */
 .others-settings {
     padding: 20px;
 }

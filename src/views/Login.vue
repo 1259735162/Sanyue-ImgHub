@@ -4,7 +4,7 @@
         <img id="bg2" class="background-image2" alt="Background Image"/>
         <ToggleDark class="toggle-dark"/>
         <div class="login-container">
-            <h1 class="login-title">登录到 {{ ownerName }} 图床</h1>
+            <h1 class="login-title">登录</h1>
             <div class="input-container">
                 <a class="input-name">密码</a>
                 <el-input 
@@ -19,7 +19,7 @@
             </div>
             <el-button class="submit" type="primary" @click="login">登录</el-button>
         </div>
-        <Footer class="footer"/>
+        <!--<Footer class="footer"/>-->
     </div>
 </template>
 
